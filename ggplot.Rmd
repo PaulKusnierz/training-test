@@ -1,0 +1,222 @@
+---
+title: "ggplot"
+author: "Paul Kusnierz"
+date: "May 21, 2018"
+output: 
+  html_document: 
+    fig_caption: yes
+    fig_width: 5
+    toc: yes
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(tidyr)
+  library(dplyr)
+  library(ggthemes)
+})
+```
+
+
+```{r}
+# https://knb.ecoinformatics.org/#view/urn:uuid:e05865d7-678d-4513-9061-2ab7d979f8e7
+# Search 'permit value'
+permits <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Aa3c58bd6-481e-4c64-aa93-795df10a4664", method = "libcurl"),
+                    stringsAsFactors = FALSE)
+```
+
+
+```{r}
+ggplot(permits, aes(Value, StdDev)) + 
+  geom_point()
+```
+
+```{r}
+ggplot(permits, aes(Value, StdDev, color = Gear)) + 
+  geom_point()
+```
+
+```{r}
+ggplot(permits, aes(Value, StdDev)) +
+  geom_point(color = "blue")
+```
+```{r}
+ggplot(permits, aes(Value, StdDev, color = Gear, size = Range)) +
+  geom_point()
+```
+Figure 3
+
+
+```{r}
+ggplot(permits, aes(Value)) + 
+  geom_histogram()
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+## Warning: Removed 14 rows containing non-finite values (stat_bin).
+```
+
+```{r}
+ggplot(permits, aes(Value)) + 
+  geom_histogram(binwidth = 1e4)
+## Warning: Removed 14 rows containing non-finite values (stat_bin).
+```
+
+
+```{r}
+ggplot(permits, aes(Gear, Value)) + 
+  geom_boxplot()
+```
+
+
+```{r}
+permits_ci <- permits %>%
+  filter(Region == "Cook Inlet")
+
+ggplot(permits_ci, aes(Gear, Value)) + 
+  geom_violin()+ 
+  geom_point(shape = 1, position = "jitter")
+```
+
+```{r}
+permits_ci <- permits %>%
+  filter(Region == "Bristol Bay")
+
+ggplot(permits_ci, aes(Gear, Value)) + 
+  geom_violin() + 
+  geom_point(shape = 1, position = "jitter")
+```
+
+```{r}
+ggplot(permits, aes(Value, StdDev)) + 
+  geom_point() +
+  geom_smooth()
+## `geom_smooth()` using method = 'loess'
+```
+
+```{r}
+ggplot(permits, aes(Value, StdDev)) + 
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+```{r}
+permits_sum <- permits %>% 
+  group_by(Gear, Region) %>% 
+  summarize(mean_value = mean(Value, na.rm = T))
+
+ggplot(permits_sum, aes(x = Gear, y = mean_value, fill = Region)) +
+  geom_bar(position = "stack", stat = "identity")
+```
+
+```{r}
+ggplot(permits_sum, aes(x = Gear, y = mean_value, fill = Region)) +
+  geom_bar(position = "dodge", stat = "identity")
+```
+
+
+```{r}
+ggplot(permits_sum, aes(x = Gear, y = mean_value, fill = Region)) +
+  geom_bar(position = "fill", stat = "identity")
+```
+
+
+```{r}
+permits_se_seine <- permits %>% 
+  filter(Gear == "Purse Seine", 
+         Region == "Southeast")
+
+ggplot(permits_se_seine, aes(Year, Value)) + 
+  geom_point() +
+  geom_line()
+```
+
+```{r}
+ggplot(permits_se_seine, aes(Year, Value)) + 
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(limits = c(0, max(permits_se_seine$Value)))
+```
+
+```{r}
+ggplot(permits_se_seine, aes(Year, Value)) + 
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(limits = c(0, max(permits_se_seine$Value))) +
+  scale_x_continuous(limits = c(2000, max(permits_se_seine$Year))) + 
+  theme_minimal() +
+  labs(title = "Seine 2000 to present")
+```
+
+```{r}
+ggplot(permits_se_seine, aes(Year, Value)) + 
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(limits = c(0, max(permits_se_seine$Value)))
+```
+
+```{r}
+ggplot(permits_se_seine, aes(Year, Value)) + 
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(limits = c(0, max(permits_se_seine$Value))) +
+  scale_x_continuous(limits = c(2000, max(permits_se_seine$Year))) + 
+  theme_excel() +
+  labs(title = "Seine 2000 to present")
+```
+
+```{r}
+ggplot(permits_ci, aes(Year, Value)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ Gear)
+```
+
+
+```{r}
+ggplot(permits_ci, aes(Year, Value)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ Gear, ncol = 1)
+```
+
+```{r} 
+ggplot(permits, aes(Year, Value, group = Region)) +
+  geom_line() +
+  facet_wrap(~ Gear)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
