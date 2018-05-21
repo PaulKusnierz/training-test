@@ -18,7 +18,7 @@ catch_df <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df3
                     stringsAsFactors = FALSE)
 head(catch_df)
 ```
-
+ 
 ```{r}
 catch_df <-catch_df%>%
   select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
@@ -27,6 +27,75 @@ catch_df <-catch_df%>%
 ```{r}
 head(catch_df)
 ```
+
+```{r}
+catch_df <-catch_df %>%
+  gather(key = species, value = catch, -Region, -Year)
+```
+
+```{r}
+head(catch_df)
+```
+
+
+```{r}
+catch_df <- catch_df %>% 
+  rename(catch_thousands = catch)
+```
+
+```{r}
+head(catch_df)
+```
+
+```{r}
+catch_df <- catch_df %>%
+  mutate(catch = catch_thousands * 1000)
+```
+```{r}
+catch_integers <- as.integer(catch_df$catch_thousands)
+```
+
+```{r}
+which(is.na(catch_integers))
+```
+
+```{r}
+catch_df[401,]
+```
+
+```{r}
+catch_df <- catch_df %>%
+  mutate(catch_thousands = ifelse(catch_thousands == "I", 1, catch_thousands),
+         catch_thousands = as.integer(catch_thousands))
+```
+
+```{r}
+catch_df <- catch_df %>%
+  mutate(catch = catch_thousands * 1000)
+```
+
+```{r}
+summary(catch_df)
+```
+
+
+```{r}
+catch_df <- catch_df %>% 
+  select(-catch_thousands)
+```
+
+```{r}
+head(catch_df)
+```
+
+```{r}
+catch_df %>% 
+  filter(species == "Chinook") %>%
+  group_by(Region) %>%
+  summarise(mean_catch = mean(catch)) %>% #calc mean catch
+  arrange(desc(mean_catch)) #sort in desc order by catch
+```
+
 
 ## R Markdown
 
